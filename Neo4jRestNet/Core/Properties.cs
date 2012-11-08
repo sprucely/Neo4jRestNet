@@ -6,6 +6,7 @@ using System.Collections;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
+using System.ComponentModel;
 
 namespace Neo4jRestNet.Core
 {
@@ -37,7 +38,11 @@ namespace Neo4jRestNet.Core
 				return (T)Convert.ChangeType(o, u);
 			}
 			
-			return t.IsEnum ? (T)Enum.Parse(t, (string)o, true) : (T)Convert.ChangeType(o, t);
+			return t.IsEnum 
+				? (T)Enum.Parse(t, (string)o, true) 
+				: o is string
+					? (T)TypeDescriptor.GetConverter(t).ConvertFromInvariantString((string)o)
+					: (T)Convert.ChangeType(o, t);
 		}
 
 		public T GetProperty<T>(string key)
